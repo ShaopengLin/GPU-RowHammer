@@ -1,0 +1,3 @@
+/home/snowsr/projects/gddr/CMakeFiles/gddr.dir
+/home/snowsr/projects/gddr/CMakeFiles/edit_cache.dir
+/home/snowsr/projects/gddr/CMakeFiles/rebuild_cache.dir

@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CUDA_STANDARD 14)
 
 
-add_executable(untitled1 vm_map_id.cu)
-
-set_property(TARGET untitled1 PROPERTY CUDA_ARCHITECTURES native)
+add_executable(no_op vm_map_id.cu)
+add_executable(op vm_map_id_op.cu)
+set_property(TARGET no_op PROPERTY CUDA_ARCHITECTURES native)
+set_property(TARGET op PROPERTY CUDA_ARCHITECTURES native)
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O0 -Xcicc -O0 -Xptxas -O0")
