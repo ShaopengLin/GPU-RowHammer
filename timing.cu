@@ -50,7 +50,7 @@ int main(void)
   long long *time;
   cudaHostAlloc(&time, sizeof(long long), cudaHostAllocDefault);
 
-  for (int i = 0; i < 1024 * 1024; i++)
+  for (int i = 0; i < 1024 * 1024 * 1024; i++)
   {
     long long t = 0;
     for (int j = 0; j < 10; j++)
@@ -58,7 +58,6 @@ int main(void)
       mapping_kernel<<<1, 1>>>(d_x, d_x + i, time);
       cudaDeviceSynchronize();
       t += *time;
-      usleep(1);
     }
     t /= 10;
     std::cout << d_x + i << '\t' <<  (t/1620000000.0f)*1000000000.0 << '\n';
