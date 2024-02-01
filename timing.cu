@@ -59,33 +59,50 @@ long double test_single_pair(uint64_t *target, uint64_t *it_addr,
   }
   avg_time /= 10;
   avg_time = (avg_time / 1620000000.0f) * 1000000000.0;
-  std::cout << it_addr << '\t' << avg_time << '\n';
+
   return avg_time;
 }
 
 int main(void) {
-  uint64_t *d_x;
-  cudaMalloc(&d_x, LAYOUT_SIZE);
+  uint64_t *addr;
+  cudaMalloc(&addr, LAYOUT_SIZE);
 
   long long *time;
   cudaHostAlloc(&time, sizeof(long long), cudaHostAllocDefault);
 
-  uint64_t *new_target = NULL;
+  uint64_t *conflict_addr = NULL;
+  long double ld_time;
   for (int i = 0; i < 1024 * 10; i++) {
-    if (test_single_pair(d_x, d_x + i, 10, time) > 400 && i > 0) {
-      new_target = d_x + i;
+
+    ld_time = test_single_pair(addr, addr + i, 10, time);
+    std::cout << addr + i << '\t' << ld_time << '\n';
+
+    if (ld_time > 400 && i > 0) {
+      conflict_addr = addr + i;
       break;
     }
   }
 
-  std::cout << "\nFound Conflict:" << '\n';
-  std::cout << test_single_pair(new_target, d_x, 10, time) << '\t'
-            << test_single_pair(d_x, new_target, 10, time) << '\n';
-  std::cout << "\nNew Target Normal Time:" << '\n';
-  std::cout << test_single_pair(new_target, new_target, 10, time) << '\n';
+  std::cout << "\nFound Row Buffer Conflict:" << '\n';
+  std::cout << "\nAccess " << addr << " then " << conflict_addr << '\n'
+            << test_single_pair(conflict_addr, addr, 10, time) << '\n';
+  std::cout << "\nAccess " << conflict_addr << " then " << addr << '\n'
+            << test_single_pair(addr, conflict_addr, 10, time) << '\n';
 
-  std::cout << "\nd_x Normal Time:" << '\n';
-  std::cout << test_single_pair(new_target, new_target, 10, time) << '\n';
+  std::cout << "\nRow Buffered Accesses to " << addr << '\n'
+            << test_single_pair(addr, addr, 10, time) << '\n';
 
-  cudaFree(d_x);
+  std::cout << "\nRow Buffered Accesses to " << conflict_addr  << '\n'
+            << test_single_pair(conflict_addr, conflict_addr, 10, time) << '\n';
+
+  std::cout << "\nAccess " << conflict_addr << " then " << conflict_addr + 1
+            << '\n'
+            << test_single_pair(conflict_addr, conflict_addr + 1, 10, time)
+            << '\n';
+  std::cout << "\nAccess " << conflict_addr + 1 << " then " << conflict_addr
+            << '\n'
+            << test_single_pair(conflict_addr + 1, conflict_addr, 10, time)
+            << '\n';
+
+  cudaFree(addr);
 }
