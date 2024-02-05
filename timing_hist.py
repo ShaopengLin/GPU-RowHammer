@@ -29,3 +29,13 @@ plt.ylabel('Amount of addresses')
 plt.title('Row Buffer Conflict Histogram')
 
 plt.show()
+
+plt.scatter(x, y, color='blue', alpha=0.7)
+
+# Adding labels and title
+plt.xlabel('Memory Addresses (offset)')
+plt.ylabel('Fetch Time (ns)')
+plt.title('Memory Addresses vs Fetch Time Scatter Plot')
+
+# Display the plot
+plt.show()
