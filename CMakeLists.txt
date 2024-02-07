@@ -7,4 +7,6 @@ set(CMAKE_CUDA_STANDARD 14)
 
 add_executable(timing timing.cu)
 set_property(TARGET timing PROPERTY CUDA_ARCHITECTURES native)
-# set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O0 -Xcicc -O0 -Xptxas -O0")
+# set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --generate-line-info -O0 -Xcicc -O0")
+# set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --generate-line-info -O0 -Xcicc -O0 -Xptxas -O0")
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --generate-line-info")

@@ -17,13 +17,21 @@ __global__ void timing_pair_kernel(uint64_t *target, uint64_t *it_addr,
   volatile long long clock_end;
   volatile uint64_t temp;
 
+  /* Uncache target from previous accesses */
+  asm volatile("{\n\t"
+               "discard.global.L2 [%0], 128;\n\t"
+               "}"
+               : "+l"(target));
+
   /* Bring iterator to row buffer and uncache it. */
   asm volatile("{\n\t"
-               "ld.u64.global.volatile %0, [%1];\n\t"
                "discard.global.L2 [%1], 128;\n\t"
+               "ld.u64.global.volatile %0, [%1];\n\t"
+               //  "discard.global.L2 [%1], 128;\n\t"
                "}"
                : "=l"(temp)
-               : "l"(it_addr));
+               : "l"(it_addr)
+               : "memory");
 
   /* Uncache target from previous accesses */
   asm volatile("{\n\t"
@@ -62,26 +70,31 @@ __global__ void timing_triple_kernel(uint64_t *addr1, uint64_t *addr2,
   volatile long long clock_end;
   volatile uint64_t temp;
   volatile uint64_t temp1;
+
   /* Bring iterator to row buffer and uncache it. */
   asm volatile("{\n\t"
+               "discard.global.L2 [%1], 128;\n\t"
                "ld.u64.global.volatile %0, [%1];\n\t"
                "discard.global.L2 [%1], 128;\n\t"
                "}"
                : "=l"(temp)
-               : "l"(addr1));
+               : "l"(addr1)
+               : "memory");
 
   asm volatile("{\n\t"
+               "discard.global.L2 [%1], 128;\n\t"
                "ld.u64.global.volatile %0, [%1];\n\t"
                "discard.global.L2 [%1], 128;\n\t"
                "}"
-               : "=l"(temp1)
-               : "l"(addr3));
+               : "=l"(temp)
+               : "l"(addr3)
+               : "memory");
 
   /* Uncache target from previous accesses */
   asm volatile("{\n\t"
                "discard.global.L2 [%0], 128;\n\t"
                "}"
-               : "+l"(addr2));
+               : "+l"(addr2)::"memory");
 
   /* Start Clock (Note: putting discard together with this will cause it
    to be optimized away) */
@@ -89,13 +102,13 @@ __global__ void timing_triple_kernel(uint64_t *addr1, uint64_t *addr2,
                "mov.u64 %0, %%clock64;\n\t"
                "}"
                : "=l"(clock_start));
-
   /* Test access to target. If it_addr is not a conflict should be fast */
   asm volatile("{\n\t"
                "ld.u64.global.volatile %0, [%1];\n\t"
                "}"
                : "=l"(temp)
-               : "l"(addr2));
+               : "l"(addr2)
+               : "memory");
 
   /* End clock */
   asm volatile("{\n\t"
@@ -116,8 +129,9 @@ __global__ void timing_triple_kernel(uint64_t *addr1, uint64_t *addr2,
   asm volatile("{\n\t"
                "ld.u64.global.volatile %0, [%1];\n\t"
                "}"
-               : "=l"(temp1)
-               : "l"(addr3));
+               : "=l"(temp)
+               : "l"(addr3)
+               : "memory");
 
   /* End clock */
   asm volatile("{\n\t"
@@ -185,13 +199,17 @@ std::vector<uint64_t *> find_n_conflict(uint64_t *addr, uint64_t n,
   for (; i < LAYOUT_SIZE / 8; i++)
   {
     bool is_conflict = true;
+    long double ld_time;
     for (const auto &conf_addr : conflict_lst)
-      is_conflict &=
-          test_single_pair(addr + i, conf_addr, 10, time) > threshold;
+    {
+      ld_time = test_single_pair(addr + i, conf_addr, 10, time);
+      is_conflict &= ld_time > threshold;
+      // std::cout << addr + i << '\t' << conf_addr << '\t' << ld_time << '\n';
+    }
 
     if (is_conflict)
     {
-      std::cout << addr + i << '\n';
+      std::cout << conflict_lst.size() << ' ' << addr + i << '\n';
       conflict_lst.push_back(addr + i);
     }
 
@@ -218,14 +236,14 @@ int main(void)
   long double ld_time;
   timing_pair_kernel<<<1, 1>>>(addr, addr, time);
 
-  for (int i = 0; i < 100; i++)
+  for (int i = 0; i < 1024 * 1024; i++)
   {
-    ld_time = test_single_pair(addr, addr + i, 10, time);
+    ld_time = test_single_pair(addr + i, addr, 1, time);
     std::cout << addr + i << '\t' << ld_time << '\n';
   }
 
-  auto conflict_lst = find_n_conflict(addr, 32, 400);
-  // std::cout << test_single_pair(conflict_lst[0], conflict_lst[1], 10, time)
+  // auto conflict_lst = find_n_conflict(addr, 4, 400);
+  // std::cout << test_single_pair(conflict_lst[2], conflict_lst[0], 10, time)
   //           << '\n';
   // std::cout << test_single_pair(conflict_lst[1], conflict_lst[2], 10, time)
   //           << '\n';
@@ -234,6 +252,14 @@ int main(void)
   // cudaDeviceSynchronize();
   // auto tup = test_single_triple(conflict_lst[0], conflict_lst[1],
   //                               conflict_lst[2], 10, time, time2);
+  // test_single_pair(addr + 4, addr + 8, 10, time);
+  // std::cout << test_single_pair(addr + 4, addr + 8, 10, time) << '\n';
+  // std::cout << test_single_pair(addr + 8, addr + 4, 10, time) << '\n';
+  // std::cout << test_single_pair(addr, addr + 4, 10, time) << '\n';
+  // std::cout << test_single_pair(addr + 4, addr, 10, time) << '\n';
+  // std::cout << test_single_pair(addr, addr + 8, 10, time) << '\n';
+  // std::cout << test_single_pair(addr + 8, addr, 10, time) << '\n';
+  // auto tup = test_single_triple(addr, addr + 4, addr + 8, 10, time, time2);
   // std::cout << std::get<0>(tup) << '\n';
   // std::cout << std::get<1>(tup) << '\n';
 
