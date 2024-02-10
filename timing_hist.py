@@ -12,7 +12,7 @@ with open(sys.argv[1]) as f:
         y.append(float(yt))
 spike = []
 for e in y:
-    if e > 400:
+    if e < 305:
         spike.append(e)
 print(len(y))
 print(len(spike))
