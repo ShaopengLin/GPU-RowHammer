@@ -47,8 +47,8 @@ __forceinline__ __device__ void time_access_triple(uint64_t *addr_access,
   uint64_t temp __attribute__((unused)), clock_start, clock_end;
 
   asm volatile("{\n\t"
-               "discard.global.L2 [%0], 128;\n\t"
-               "discard.global.L2 [%0], 128;\n\t"
+               //  "discard.global.L2 [%0], 128;\n\t"
+               //  "discard.global.L2 [%0], 128;\n\t"
                "discard.global.L2 [%0], 128;\n\t"
                "}" ::"l"(addr_access),
                "l"(addr_o1), "l"(addr_o2));
@@ -265,8 +265,8 @@ int main(void)
   // myfile.close();
 
   myfile.open("3Conflict.txt");
-  auto conf_vec = n_conflict_exp(addr, time_arr, 32, 10);
-  // compare_2and3_conflict_exp(conf_vec, time_arr, EXP_COUNT, &myfile);
+  auto conf_vec = n_conflict_exp(addr, time_arr, 5, 10);
+  compare_2and3_conflict_exp(conf_vec, time_arr, EXP_COUNT, &myfile);
   // repeat_exp_3conflict(conf_vec[0], conf_vec[1], conf_vec[2], time_arr,
   //                      EXP_COUNT, &myfile, true);
   // repeat_exp_3conflict(conf_vec[3], conf_vec[1], conf_vec[2], time_arr,
