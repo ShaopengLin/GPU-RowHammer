@@ -60,8 +60,10 @@ uint64_t N_Conflict::repeat_n_addr_exp(const uint64_t **addr_arr,
              cudaMemcpyHostToDevice);
 
   for (uint64_t i = 0; i < this->EXP_IT; i++)
+  {
     n_address_conflict_kernel<<<1, this->N>>>(
         this->ADDR_LST_BUF, this->TIME_ARR_DEVICE + this->N * i);
+  }
 
   cudaDeviceSynchronize();
   cudaMemcpy(this->TIME_ARR_HOST, this->TIME_ARR_DEVICE,
