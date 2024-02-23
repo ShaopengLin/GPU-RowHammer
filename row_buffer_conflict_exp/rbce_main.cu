@@ -1,5 +1,6 @@
 #include "rbce_main.cuh"
 #include <algorithm>
+#include <cstdlib>
 #include <iostream>
 #include <numeric>
 #include <vector>
@@ -141,6 +142,31 @@ find_n_rows_file(N_Conflict &nc_test, uint64_t num_row, uint64_t threshold)
   return conf_vec;
 }
 
+bool test_random_row_conflict(N_Conflict &nc_test,
+                              std::vector<const uint64_t *> conf_vec,
+                              uint64_t num_row, uint64_t threshold)
+{
+  srand(time(0));
+  uint64_t random_row_idx = rand() % num_row;
+
+  const uint64_t *addr_start = nc_test.get_addr_layout();
+  const uint64_t **addr = new const uint64_t *[2];
+  addr[0] = conf_vec[random_row_idx];
+
+  return std::accumulate(
+      conf_vec.begin(), conf_vec.end(), true,
+      [&nc_test, addr, threshold](bool all_conflict, const uint64_t *conf_addr)
+      {
+        if (conf_addr == addr[0])
+          return all_conflict;
+        std::cout << conf_addr << '\n';
+        addr[1] = conf_addr;
+        uint64_t time = nc_test.repeat_n_addr_exp(addr, NULL);
+        std::cout << time << '\n';
+        return all_conflict && (time > threshold);
+      });
+}
+
 } // namespace rbce
 
 int main(int argc, char *argv[])
@@ -161,7 +187,12 @@ int main(int argc, char *argv[])
   }
   else if (argv[1] == rbce::FIND_ROW_FILE && argc >= 7)
   {
-    find_n_rows_file(nc_test, std::stoull(argv[5]), std::stoull(argv[6]));
+    std::cout << test_random_row_conflict(
+                     nc_test,
+                     find_n_rows_file(nc_test, std::stoull(argv[5]),
+                                      std::stoull(argv[6])),
+                     std::stoull(argv[5]), std::stoull(argv[6]))
+              << '\n';
   }
   else
   {

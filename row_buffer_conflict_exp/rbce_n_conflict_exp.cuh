@@ -22,7 +22,7 @@ private:
 
 public:
   const uint64_t LAYOUT_SIZE = 16106127360;
-  const uint64_t STEP_SIZE = 8; /* In Bytes */
+  const uint64_t STEP_SIZE = 4; /* In Bytes */
 
   N_Conflict(int argc, char *argv[]);
   N_Conflict(uint64_t N, uint64_t EXP_RANGE, uint64_t EXP_IT);
