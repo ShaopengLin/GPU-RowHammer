@@ -119,6 +119,7 @@ find_n_rows_file(N_Conflict &nc_test, uint64_t num_row, uint64_t threshold)
         addr[1] = *it;
         uint64_t time = nc_test.repeat_n_addr_exp(addr, NULL);
         all_conflict &= (time > threshold);
+        std::cout << all_conflict << '\n';
       }
 
       if (all_conflict)
