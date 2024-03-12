@@ -12,6 +12,11 @@ add_executable(rbce ./row_buffer_conflict_exp/rbce_main.cu)
 target_link_libraries(rbce PUBLIC rbce_lib)
 set_property(TARGET rbce PROPERTY CUDA_ARCHITECTURES native)
 
+# Get Bank Offset
+add_executable(rbce_gbo ./row_buffer_conflict_exp/rbce_gbo_main.cu)
+target_link_libraries(rbce_gbo PUBLIC rbce_lib)
+set_property(TARGET rbce_gbo PROPERTY CUDA_ARCHITECTURES native)
+
 # Hammer
 ## Simple hammer
 add_executable(simple_hammer ./hammer/simple_hammer/main.cu)

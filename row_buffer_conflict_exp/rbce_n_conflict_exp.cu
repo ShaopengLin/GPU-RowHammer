@@ -30,8 +30,9 @@ N_Conflict::N_Conflict(int argc, char *argv[])
   this->CLOCK_RATE = device_prop.clockRate;
 }
 
-N_Conflict::N_Conflict(uint64_t N, uint64_t EXP_RANGE, uint64_t EXP_IT)
-    : N{N}, EXP_RANGE{EXP_RANGE}, EXP_IT{EXP_IT}
+N_Conflict::N_Conflict(uint64_t N, uint64_t EXP_RANGE, uint64_t EXP_IT,
+                       uint64_t STEP_SIZE)
+    : N{N}, EXP_RANGE{EXP_RANGE}, EXP_IT{EXP_IT}, STEP_SIZE{STEP_SIZE}
 {
   printf("%ld, %ld, %ld\n", this->N, this->EXP_RANGE, this->EXP_IT);
   cudaMalloc(&(this->ADDR_LAYOUT), this->LAYOUT_SIZE);
