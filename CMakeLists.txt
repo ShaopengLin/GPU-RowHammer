@@ -8,14 +8,19 @@ set(CMAKE_CUDA_STANDARD 14)
 add_library(rbce_lib row_buffer_conflict_exp/rbce_n_conflict_exp.cu)
 set_property(TARGET rbce_lib PROPERTY CUDA_ARCHITECTURES native)
 
-add_executable(rbce ./row_buffer_conflict_exp/rbce_main.cu)
-target_link_libraries(rbce PUBLIC rbce_lib)
-set_property(TARGET rbce PROPERTY CUDA_ARCHITECTURES native)
+# add_executable(rbce ./row_buffer_conflict_exp/rbce_main.cu)
+# target_link_libraries(rbce PUBLIC rbce_lib)
+# set_property(TARGET rbce PROPERTY CUDA_ARCHITECTURES native)
 
 # Get Bank Offset
 add_executable(rbce_gbo ./row_buffer_conflict_exp/rbce_gbo_main.cu)
 target_link_libraries(rbce_gbo PUBLIC rbce_lib)
 set_property(TARGET rbce_gbo PROPERTY CUDA_ARCHITECTURES native)
+
+# Get Timing values
+add_executable(rbce_gen_time ./row_buffer_conflict_exp/rbce_gen_time_main.cu)
+target_link_libraries(rbce_gen_time PUBLIC rbce_lib)
+set_property(TARGET rbce_gen_time PROPERTY CUDA_ARCHITECTURES native)
 
 # Hammer
 ## Simple hammer

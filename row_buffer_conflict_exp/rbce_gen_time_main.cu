@@ -7,19 +7,14 @@ int main(int argc, char *argv[])
   rbce::N_Conflict nc_test(2, std::stoull(argv[1]), std::stoull(argv[2]),
                            std::stoull(argv[3]));
 
-  /* Argument Threshold */
-  uint64_t threshold = std::stoull(argv[4]);
-
-  /* Offset to an address in Target Bank */
-  uint64_t offset_to_bank = std::stoull(argv[5]);
-
-  std::ofstream offset_file;
-  offset_file.open(argv[6]); /* Argument File name */
+  std::ofstream time_file;
+  time_file.open(argv[4]); /* Argument File name */
+  
   const uint8_t **addr = new const uint8_t *[2];
   const uint8_t *addr_start = nc_test.get_addr_layout();
-
+  
   /* Initialize address pairs */
-  addr[0] = addr_start + offset_to_bank;
+  addr[0] = addr_start;
   addr[1] = addr_start + 1;
   nc_test.repeat_n_addr_exp(addr, NULL);
 
@@ -27,11 +22,10 @@ int main(int argc, char *argv[])
   for (; step < nc_test.get_exp_range(); step += nc_test.STEP_SIZE)
   {
     addr[1] = addr_start + step;
-    if (threshold < nc_test.repeat_n_addr_exp(addr, NULL))
-      offset_file << step << '\n';
+    nc_test.repeat_n_addr_exp(addr, &time_file);
   }
-
-  offset_file.close();
+  delete[] addr;
+  time_file.close();
 
   return 0;
 }

@@ -12,8 +12,8 @@ class N_Conflict
 private:
   uint64_t *TIME_ARR_DEVICE;
   uint64_t *TIME_ARR_HOST;
-  uint64_t *ADDR_LAYOUT;
-  uint64_t **ADDR_LST_BUF;
+  uint8_t *ADDR_LAYOUT;
+  uint8_t **ADDR_LST_BUF;
   uint64_t N = 2;               /* Arg3 */
   uint64_t EXP_RANGE = 8388608; /* Arg4 */
   uint64_t EXP_IT = 10;         /* Arg5 */
@@ -21,8 +21,7 @@ private:
   uint64_t CLOCK_RATE;
 
 public:
-  const uint64_t LAYOUT_SIZE =
-      20971520;                 // 524288000; // 1073741824; // 16106127360;
+  const uint64_t LAYOUT_SIZE = 16106127360;
   const uint64_t STEP_SIZE = 8; /* In Bytes */
 
   N_Conflict(int argc, char *argv[]);
@@ -30,7 +29,7 @@ public:
              uint64_t STEP_SIZE = 4);
   ~N_Conflict();
 
-  const uint64_t *get_addr_layout() { return ADDR_LAYOUT; };
+  const uint8_t *get_addr_layout() { return ADDR_LAYOUT; };
   uint64_t get_exp_range() { return EXP_RANGE; };
   void set_exp_range(uint64_t EXP_RANGE) { this->EXP_RANGE = EXP_RANGE; };
   /**
@@ -42,7 +41,7 @@ public:
    * @param time_arr storage of time spent.
    */
 
-  uint64_t repeat_n_addr_exp(const uint64_t **addr_arr, std::ofstream *file);
+  uint64_t repeat_n_addr_exp(const uint8_t **addr_arr, std::ofstream *file);
 };
 
 } // namespace rbce

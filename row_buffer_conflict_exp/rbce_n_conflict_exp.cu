@@ -1,9 +1,9 @@
 #include "rbce_n_conflict_exp.cuh"
-
+#include <iostream>
 namespace rbce
 {
 
-__global__ void n_address_conflict_kernel(uint64_t **addr_arr,
+__global__ void n_address_conflict_kernel(uint8_t **addr_arr,
                                           uint64_t *time_arr)
 {
   uncached_access_timing_device(*(addr_arr + threadIdx.x),
@@ -22,7 +22,7 @@ N_Conflict::N_Conflict(int argc, char *argv[])
   cudaMalloc(&(this->ADDR_LAYOUT), this->LAYOUT_SIZE);
   cudaMalloc(&(this->TIME_ARR_DEVICE),
              this->N * sizeof(uint64_t) * this->EXP_IT);
-  cudaMalloc(&(this->ADDR_LST_BUF), this->N * sizeof(uint64_t));
+  cudaMalloc(&(this->ADDR_LST_BUF), this->N * sizeof(uint8_t *));
   this->TIME_ARR_HOST = new uint64_t[this->N * this->EXP_IT];
 
   struct cudaDeviceProp device_prop;
@@ -34,11 +34,14 @@ N_Conflict::N_Conflict(uint64_t N, uint64_t EXP_RANGE, uint64_t EXP_IT,
                        uint64_t STEP_SIZE)
     : N{N}, EXP_RANGE{EXP_RANGE}, EXP_IT{EXP_IT}, STEP_SIZE{STEP_SIZE}
 {
+  
   printf("%ld, %ld, %ld\n", this->N, this->EXP_RANGE, this->EXP_IT);
+  
   cudaMalloc(&(this->ADDR_LAYOUT), this->LAYOUT_SIZE);
   cudaMalloc(&(this->TIME_ARR_DEVICE),
              this->N * sizeof(uint64_t) * this->EXP_IT);
-  cudaMalloc(&(this->ADDR_LST_BUF), this->N * sizeof(uint64_t));
+  
+  cudaMalloc(&(this->ADDR_LST_BUF), this->N * sizeof(uint8_t *));
   this->TIME_ARR_HOST = new uint64_t[this->N * this->EXP_IT];
 
   struct cudaDeviceProp device_prop;
@@ -54,12 +57,12 @@ N_Conflict::~N_Conflict()
   delete[] this->TIME_ARR_HOST;
 }
 
-uint64_t N_Conflict::repeat_n_addr_exp(const uint64_t **addr_arr,
+uint64_t N_Conflict::repeat_n_addr_exp(const uint8_t **addr_arr,
                                        std::ofstream *file)
 {
-  cudaMemcpy(this->ADDR_LST_BUF, addr_arr, this->N * sizeof(uint64_t),
+  
+  cudaMemcpy(this->ADDR_LST_BUF, addr_arr, this->N * sizeof(uint8_t *),
              cudaMemcpyHostToDevice);
-
   for (uint64_t i = 0; i < this->EXP_IT; i++)
   {
     n_address_conflict_kernel<<<1, this->N>>>(
@@ -69,7 +72,6 @@ uint64_t N_Conflict::repeat_n_addr_exp(const uint64_t **addr_arr,
   cudaDeviceSynchronize();
   cudaMemcpy(this->TIME_ARR_HOST, this->TIME_ARR_DEVICE,
              this->N * sizeof(uint64_t) * this->EXP_IT, cudaMemcpyDeviceToHost);
-
   uint64_t min = LONG_MAX;
   for (uint64_t i = 0; i < this->EXP_IT; i++)
     min = std::min(this->TIME_ARR_HOST[this->N * i], min);
@@ -78,10 +80,10 @@ uint64_t N_Conflict::repeat_n_addr_exp(const uint64_t **addr_arr,
   {
     *file << '(';
     for (int i = 0; i < this->N; i++)
-      *file << *(addr_arr + i) << ", ";
+      // For some reason uint8_t* not printable
+      *file << (void *)(*(addr_arr + i)) << ", "; 
     *file << ")\t" << toNS(min, CLOCK_RATE) << '\n';
   }
-
   return toNS(min, CLOCK_RATE);
 }
 
