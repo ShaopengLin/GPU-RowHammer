@@ -12,7 +12,7 @@ set_property(TARGET rbce_lib PROPERTY CUDA_ARCHITECTURES native)
 # target_link_libraries(rbce PUBLIC rbce_lib)
 # set_property(TARGET rbce PROPERTY CUDA_ARCHITECTURES native)
 
-# Get BConflict Set
+# Get Conflict Set
 add_executable(rbce_conf_set ./row_buffer_conflict_exp/rbce_conf_set_main.cu)
 target_link_libraries(rbce_conf_set PUBLIC rbce_lib)
 set_property(TARGET rbce_conf_set PROPERTY CUDA_ARCHITECTURES native)
@@ -21,6 +21,11 @@ set_property(TARGET rbce_conf_set PROPERTY CUDA_ARCHITECTURES native)
 add_executable(rbce_row_set ./row_buffer_conflict_exp/rbce_row_set_main.cu)
 target_link_libraries(rbce_row_set PUBLIC rbce_lib)
 set_property(TARGET rbce_row_set PROPERTY CUDA_ARCHITECTURES native)
+
+# Get Bank Set
+add_executable(rbce_get_banks ./row_buffer_conflict_exp/rbce_get_banks_main.cu)
+target_link_libraries(rbce_get_banks PUBLIC rbce_lib)
+set_property(TARGET rbce_get_banks PROPERTY CUDA_ARCHITECTURES native)
 
 # Get Timing values
 add_executable(rbce_gen_time ./row_buffer_conflict_exp/rbce_gen_time_main.cu)

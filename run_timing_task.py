@@ -71,6 +71,12 @@ def get_parser_row_set(parser):
         default=0,
     )
     parser_row_set.add_argument(
+        "--max",
+        type=int,
+        help="Maximum number of rows we will get.",
+        default=0,
+    )
+    parser_row_set.add_argument(
         "inputFile",
         type=str,
         help="File to store offset.",
@@ -137,7 +143,7 @@ if __name__ == "__main__":
             p.wait()
         case "row_set":
             p = subprocess.Popen(
-                f"./out/build/rbce_row_set {args.it} {args.threshold} {args.trgtBankOfs} {args.inputFile} {args.outputFile}",
+                f"./out/build/rbce_row_set {args.it} {args.threshold} {args.trgtBankOfs} {args.max} {args.inputFile} {args.outputFile}",
                 shell=True,
             )
             p.wait()

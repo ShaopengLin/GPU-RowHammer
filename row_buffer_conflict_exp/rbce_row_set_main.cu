@@ -13,6 +13,9 @@ int main(int argc, char *argv[])
   /* Offset to an address in Target Bank */
   uint64_t offset_to_bank = std::stoull(argv[3]);
 
+  /* Maximum rows we want */
+  uint64_t max_row = std::stoull(argv[4]);
+
   const uint8_t **addr = new const uint8_t *[2];
   const uint8_t *addr_start = nc_test.get_addr_layout();
   std::vector<const uint8_t *> conf_vec{addr_start + offset_to_bank};
@@ -23,9 +26,9 @@ int main(int argc, char *argv[])
   nc_test.repeat_n_addr_exp(addr, NULL);
 
   std::string buf;
-  std::ifstream conf_set_file(argv[4]);
+  std::ifstream conf_set_file(argv[5]);
 
-  while (conf_set_file.peek() != EOF)
+  while (conf_set_file.peek() != EOF && max_row != conf_vec.size())
   {
     while (std::getline(conf_set_file, buf))
     {
@@ -53,7 +56,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  std::ofstream row_set_file(argv[5]);
+  std::ofstream row_set_file(argv[6]);
   const uint8_t *initial = addr_start + offset_to_bank;
   
   row_set_file << (void *)(initial) << '\t' << offset_to_bank << '\n';
